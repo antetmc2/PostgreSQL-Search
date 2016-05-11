@@ -1,0 +1,22 @@
+﻿@model Search.Models.AddNewDataModel
+@{
+    ViewBag.Title = "Add";
+}
+
+<h2>Add the new row to existing table:</h2>
+
+<p class="warningMsg">@TempData["Message"]</p>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary("", new { @class = "text-danger" })
+    <div class="form-group">
+        <div class="col-md-6" style="padding: 0 0 0 0;">
+            @Html.TextBoxFor(m => m.Data, new { @class = "form-control", id = "forma" })
+        </div>
+        <div class="col-md-6" style="text-align: left;">
+            <input type="submit" class="btn btn-default" value="Add" />
+        </div>
+    </div>
+}

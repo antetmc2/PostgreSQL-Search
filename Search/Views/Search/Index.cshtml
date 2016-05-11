@@ -1,0 +1,56 @@
+﻿@model Search.Models.SearchModel
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Search the database:</h2>
+
+<p class="warningMsg">@TempData["Message"]</p>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary("", new { @class = "text-danger" })
+    <div class="form-group">
+        <div class="col-md-6"  style="padding: 0 0 0 0;">
+            @Html.TextBoxFor(m => m.Term, new { @class = "form-control", id = "forma" })
+        </div>
+        <div class="col-md-6" style="text-align: left;">
+            <input type="submit" class="btn btn-default" value="Submit" />
+        </div>
+        <div class="row text-center">
+            <div class="col-md-offset-2 col-md-6" style="margin: 5px 0 2px 5px;">
+                @Html.RadioButtonFor(m => m.Operator, 0) <span> AND </span>
+                @Html.RadioButtonFor(m => m.Operator, 1) <span> OR </span>
+            </div>
+            <div class="col-md-offset-2 col-md-6" style="margin: 0 0 0 5px;">
+                @Html.RadioButtonFor(m => m.SearchType, 0) <span> Exact String Matching </span>
+                @Html.RadioButtonFor(m => m.SearchType, 1) <span> Use Dictionaries </span>
+                @Html.RadioButtonFor(m => m.SearchType, 2) <span> Fuzzy String Matching </span>
+            </div>
+        </div>
+    </div>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary("", new { @class = "text-danger" })
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-10">
+                @Html.TextAreaFor(m => m.SqlString, 15, 25, new { @class = "form-control", id = "SqlTextbox" })
+            </div>
+        </div>
+    </div>
+}
+
+@if(Model.SearchResults != null)
+{
+    <hr />
+    <p style="font-weight: 600;">Number of documents retrieved: @Model.SearchResults.Count()</p>
+    foreach(var a in Model.SearchResults)
+    {
+        <p class="ResultsRow" style="font-family: Calibri;"><span class="ResultsView">@Html.Raw(a.Headline)</span> [@a.Rank]</p>
+    }
+}

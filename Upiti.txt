@@ -1,0 +1,64 @@
+SELECT to_date('2015-10-04 0:00:00', 'YYYY-mm-dd');
+---------------------------------------
+CREATE TEMP TABLE hour(brHour INT);
+INSERT INTO hour VALUES(0);
+INSERT INTO hour VALUES(1);
+INSERT INTO hour VALUES(2);
+INSERT INTO hour VALUES(3);
+INSERT INTO hour VALUES(4);
+INSERT INTO hour VALUES(5);
+INSERT INTO hour VALUES(6);
+INSERT INTO hour VALUES(7);
+INSERT INTO hour VALUES(8);
+INSERT INTO hour VALUES(9);
+INSERT INTO hour VALUES(10);
+INSERT INTO hour VALUES(11);
+INSERT INTO hour VALUES(12);
+INSERT INTO hour VALUES(13);
+INSERT INTO hour VALUES(14);
+INSERT INTO hour VALUES(15);
+INSERT INTO hour VALUES(16);
+INSERT INTO hour VALUES(17);
+INSERT INTO hour VALUES(18);
+INSERT INTO hour VALUES(19);
+INSERT INTO hour VALUES(20);
+INSERT INTO hour VALUES(21);
+INSERT INTO hour VALUES(22);
+INSERT INTO hour VALUES(23);
+--SET DateStyle = 'German, DMY';
+SELECT *
+	FROM crosstab('SELECT CAST(query AS character varying(500)) AS query,
+			CAST(EXTRACT(hour FROM "timestamp") AS integer) AS hour,
+			CAST(COUNT(*) AS integer) AS brUpita
+		FROM public."Queries"
+		WHERE "timestamp" BETWEEN ''2015-10-04 0:00:00''
+			AND ''2015-10-24 23:59:59''
+		GROUP BY query, hour
+		ORDER BY query, hour',
+		'SELECT brHour FROM hour ORDER BY brHour')
+	AS pivotTable(query character varying(500), h_00_01 integer, h_01_02 integer, h_02_03 integer, h_03_04 integer, h_04_05 integer, h_05_06 integer, h_06_07 integer, h_07_08 integer, h_08_09 integer, h_09_10 integer, h_10_11 integer, h_11_12 integer, h_12_13 integer, h_13_14 integer, h_14_15 integer, h_15_16 integer, h_16_17 integer, h_17_18 integer, h_18_19 integer, h_19_20 integer, h_20_21 integer, h_21_22 integer, h_22_23 integer, h_23_24 integer)
+ORDER BY query;
+
+-------------------------------------------------
+SELECT *
+	                            FROM crosstab('SELECT CAST(query AS character varying(500)) AS query,
+			                        CAST(to_date(to_char("timestamp", ''YYYY-mm-dd''), ''YYYY-mm-dd'') AS date) AS chosenDate,
+                                    CAST(COUNT(*) AS integer) AS brUpita
+                                    FROM public."Queries"
+                                    WHERE "timestamp" BETWEEN ''2015-10-24 0:00:00''
+                                    AND ''2015-10-31 23:59:59''
+			                        GROUP BY query, chosenDate
+                                    ORDER BY query, chosenDate',
+		                        'SELECT DateInt FROM dates ORDER BY DateInt')
+                            AS pivotTable(query character varying(500), d24102015 integer, d25102015 integer, d26102015 integer, d27102015 integer, d28102015 integer, d29102015 integer, d30102015 integer, d31102015 integer)
+                        ORDER BY query;
+-------------------------------------------------
+INSERT INTO public."SeriesMovies"(title) VALUES('Mr. Bean');
+
+CREATE TRIGGER seriesmovies_insupd_trigg
+  BEFORE INSERT OR UPDATE ON public."SeriesMovies"
+  FOR EACH ROW
+  EXECUTE PROCEDURE tsvector_update_trigger
+		(titletsv, 'pg_catalog.english', title);
+
+UPDATE public."SeriesMovies" SET titletsv = to_tsvector(title);
